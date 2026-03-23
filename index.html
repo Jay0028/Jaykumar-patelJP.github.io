@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydraulic Actuation System Efficiency — Jaykumar Patel</title>
+<meta name="description" content="Using the Cyclic Performance Index to measure what other metrics miss. MSc Research, University of Manitoba."/>
+<meta property="og:title" content="Hydraulic Actuation System Efficiency — Jaykumar Patel"/>
+<meta property="og:description" content="An interactive research presentation on CPI for hydraulic systems with ESR circuits."/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{scroll-behavior:smooth}
+html{scroll-snap-type:y mandatory;overflow-y:scroll}
+body{background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;overflow-x:hidden}
+canvas#pts{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+
+.scene{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 40px 80px;text-align:center;position:relative;z-index:1;overflow:hidden}
+.s0{background:transparent}
+.s1{background:linear-gradient(170deg,#f0f0f2 0%,#e8e8ea 100%);color:#1d1d1f}
+.s2{background:linear-gradient(160deg,#021830 0%,#0C447C 100%)}
+.s3{background:linear-gradient(160deg,#080808 0%,#111 100%)}
+.s4{background:linear-gradient(160deg,#0a1f04 0%,#1a3a0a 100%)}
+.s5{background:linear-gradient(160deg,#021a14 0%,#085041 100%)}
+.s6{background:linear-gradient(170deg,#000 0%,#0a0a10 100%)}
+
+.reveal{opacity:0;transform:translateY(60px);transition:opacity 1s cubic-bezier(.22,1,.36,1),transform 1s cubic-bezier(.22,1,.36,1)}
+.reveal.on{opacity:1;transform:none}
+.rl{opacity:0;transform:translateX(-70px);transition:opacity 1s cubic-bezier(.22,1,.36,1),transform 1s cubic-bezier(.22,1,.36,1)}
+.rl.on{opacity:1;transform:none}
+.rr{opacity:0;transform:translateX(70px);transition:opacity 1s cubic-bezier(.22,1,.36,1),transform 1s cubic-bezier(.22,1,.36,1)}
+.rr.on{opacity:1;transform:none}
+.rs{opacity:0;transform:scale(.82);transition:opacity .9s cubic-bezier(.22,1,.36,1),transform .9s cubic-bezier(.22,1,.36,1)}
+.rs.on{opacity:1;transform:scale(1)}
+.d1{transition-delay:.05s}.d2{transition-delay:.18s}.d3{transition-delay:.32s}.d4{transition-delay:.46s}.d5{transition-delay:.60s}.d6{transition-delay:.74s}.d7{transition-delay:.88s}
+
+.kicker{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;opacity:.45;margin-bottom:16px}
+.hero{font-size:clamp(42px,9vw,96px);font-weight:800;line-height:1.02;letter-spacing:-.035em;margin-bottom:22px}
+.big{font-size:clamp(30px,6vw,68px);font-weight:800;line-height:1.06;letter-spacing:-.028em;margin-bottom:16px}
+.mid{font-size:clamp(22px,4vw,48px);font-weight:700;line-height:1.1;letter-spacing:-.022em;margin-bottom:14px}
+.sub{font-size:clamp(14px,2.2vw,19px);opacity:.6;max-width:540px;margin:0 auto;line-height:1.65}
+.sub-light{color:#555}
+
+.accent-blue{color:#378ADD}.accent-teal{color:#5DCAA5}.accent-amber{color:#FAC775}.accent-green{color:#C0DD97}
+
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:7px 20px;border-radius:30px;margin-bottom:26px}
+.pill-b{background:rgba(56,138,221,.14);color:#85B7EB;border:1px solid rgba(56,138,221,.3)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:680px;width:100%;margin-top:36px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:680px;width:100%;margin-top:32px}
+
+.card{border-radius:22px;padding:26px;text-align:left;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05)}
+.card-w{border-radius:22px;padding:24px;text-align:left;border:1px solid rgba(0,0,0,.08);background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.card h3,.card-w h3{font-size:14px;font-weight:700;margin-bottom:7px}
+.card-w h3{color:#1d1d1f}
+.card p{font-size:12px;opacity:.5;line-height:1.65}
+.card-w p{font-size:12px;color:#666;line-height:1.65}
+.icon{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.step-num{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-bottom:6px}
+
+.formula-box{background:rgba(239,159,39,.09);border:1px solid rgba(239,159,39,.22);border-radius:28px;padding:40px 60px;display:inline-block;margin-top:32px}
+.fn{font-size:clamp(20px,4vw,34px);font-weight:700;color:#FAC775;padding-bottom:16px;border-bottom:2px solid rgba(239,159,39,.4);letter-spacing:-.01em}
+.fd{font-size:clamp(20px,4vw,34px);font-weight:700;color:#FAC775;padding-top:16px;letter-spacing:-.01em}
+.fc{font-size:12px;opacity:.4;margin-top:18px}
+
+.stats{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:38px}
+.sbox{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:26px 34px;text-align:center;min-width:130px}
+.sval{font-size:52px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.slbl{font-size:11px;opacity:.4;margin-top:8px;letter-spacing:.05em}
+
+.bar-zone{display:flex;align-items:flex-end;justify-content:center;gap:60px;margin-top:44px;height:230px}
+.bw{display:flex;flex-direction:column;align-items:center}
+.bnum{font-size:40px;font-weight:800;letter-spacing:-.03em;margin-bottom:10px}
+.bar{width:104px;border-radius:16px 16px 0 0;transition:height 1.8s cubic-bezier(.22,1,.36,1)}
+.bfoot{width:104px;height:6px;border-radius:0 0 8px 8px;margin-bottom:16px}
+.blbl{font-size:14px;font-weight:700;margin-bottom:4px}
+.bsub{font-size:11px;opacity:.4}
+.vs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-bottom:80px}
+.va{font-size:40px;color:#C0DD97;line-height:1;animation:bob 2s ease-in-out infinite}
+.vn{font-size:30px;font-weight:800;color:#C0DD97}
+.vp{font-size:11px;font-weight:700;color:#C0DD97;background:rgba(99,153,34,.18);border:1px solid rgba(99,153,34,.28);padding:4px 16px;border-radius:12px;letter-spacing:.05em}
+
+.itiles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:600px;width:100%;margin-top:34px}
+.itile{border-radius:20px;padding:24px 16px;text-align:center;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05)}
+.ii{font-size:28px;margin-bottom:12px}
+.itile h4{font-size:13px;font-weight:700;margin-bottom:6px}
+.itile p{font-size:11px;opacity:.45;line-height:1.6}
+
+.connect-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:36px 48px;margin-top:40px;max-width:500px;width:100%}
+.connect-box h3{font-size:20px;font-weight:700;margin-bottom:10px}
+.connect-box p{font-size:13px;opacity:.5;line-height:1.6;margin-bottom:20px}
+.connect-box a{display:inline-block;font-size:13px;font-weight:700;color:#85B7EB;border:1px solid rgba(56,138,221,.35);padding:10px 28px;border-radius:20px;text-decoration:none;transition:background .2s}
+.connect-box a:hover{background:rgba(56,138,221,.15)}
+
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;opacity:.25}
+.scroll-hint span{font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+
+.progress-nav{position:fixed;right:24px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:100}
+.pndot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;border:none;outline:none;padding:0}
+.pndot.on{height:22px;border-radius:4px;background:rgba(255,255,255,.8)}
+
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+@media(max-width:600px){
+  .grid2,.grid3,.itiles{grid-template-columns:1fr}
+  .bar-zone{gap:28px}
+  .formula-box{padding:28px 32px}
+  .connect-box{padding:24px 20px}
+  .progress-nav{display:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="pts"></canvas>
+<nav class="progress-nav" id="pnav"></nav>
+
+<section class="scene s0" id="s0">
+  <div class="reveal d1"><span class="pill pill-b">MSc Research &nbsp;·&nbsp; University of Manitoba</span></div>
+  <h1 class="hero reveal d2">Hydraulic<br>Actuation<br><span class="accent-blue">Efficiency</span></h1>
+  <p class="sub reveal d3">Using the Cyclic Performance Index to measure<br>what other metrics miss</p>
+  <p class="reveal d4" style="margin-top:28px;font-size:13px;opacity:.28;letter-spacing:.07em">Jaykumar Patel &nbsp;·&nbsp; Mechanical Engineering</p>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <svg width="18" height="26" viewBox="0 0 18 26" fill="none"><rect x="1" y="1" width="16" height="24" rx="8" stroke="white" stroke-width="1.5"/><circle cx="9" cy="8" r="2.5" fill="white"><animate attributeName="cy" values="8;16;8" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite"/></circle></svg>
+  </div>
+</section>
+
+<section class="scene s1" id="s1">
+  <p class="kicker reveal d1" style="color:#D85A30">The challenge</p>
+  <h2 class="big reveal d2" style="color:#1d1d1f">Modern hydraulic systems<br>store <span style="color:#185FA5">&amp;</span> reuse energy.</h2>
+  <p class="sub sub-light reveal d3">ESR circuits — like accumulators — capture energy during braking or lowering loads and feed it back into the next cycle. Measuring them fairly requires a fundamentally new metric.</p>
+  <div class="grid3">
+    <div class="card-w rl d3">
+      <div class="icon" style="background:#E6F1FB"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="10" width="18" height="2.5" rx="1.25" fill="#185FA5"/><rect x="9" y="2" width="4" height="18" rx="2" fill="#185FA5" opacity=".38"/></svg></div>
+      <h3 style="color:#0C447C">Input energy</h3>
+      <p>From the prime mover driving the actuator through the full operating cycle</p>
+    </div>
+    <div class="card-w reveal d4">
+      <div class="icon" style="background:#E1F5EE"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3L11 19M6 8L11 3L16 8" stroke="#085041" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+      <h3 style="color:#085041">Recoverable energy</h3>
+      <p>Captured from the load by ESR circuits and stored for the next cycle</p>
+    </div>
+    <div class="card-w rr d3">
+      <div class="icon" style="background:#FAEEDA"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#854F0B" stroke-width="2" fill="none"/><path d="M11 7L11 11L14.5 11" stroke="#854F0B" stroke-width="2" stroke-linecap="round" fill="none"/></svg></div>
+      <h3 style="color:#633806">System losses</h3>
+      <p>Friction, leakage and heat dissipated across every phase of the cycle</p>
+    </div>
+  </div>
+  <p class="reveal d5" style="margin-top:22px;font-size:13px;color:#999;max-width:460px;line-height:1.7">Traditional metrics only see part of this picture — making systems with energy recovery look identical on paper to those without it.</p>
+</section>
+
+<section class="scene s2" id="s2">
+  <p class="kicker reveal d1">The solution</p>
+  <h2 class="big reveal d2">Cyclic Performance<br><span class="accent-amber">Index</span></h2>
+  <p class="sub reveal d3">One formula. Every energy flow. A single number that tells the whole story.</p>
+  <div class="rs d4 formula-box">
+    <div class="fn">E<sub>input</sub> &minus; E<sub>loss</sub></div>
+    <div class="fd">E<sub>input</sub></div>
+    <div class="fc">Higher CPI &nbsp;=&nbsp; more energy retained &amp; reused across the full cycle</div>
+  </div>
+  <div class="stats">
+    <div class="sbox rl d5"><div class="sval accent-blue">3</div><div class="slbl">Energy flows captured</div></div>
+    <div class="sbox reveal d5"><div class="sval accent-teal">1</div><div class="slbl">Unified metric</div></div>
+    <div class="sbox rr d5"><div class="sval accent-amber">&#x221E;</div><div class="slbl">System types supported</div></div>
+  </div>
+</section>
+
+<section class="scene s3" id="s3">
+  <p class="kicker reveal d1">Methodology</p>
+  <h2 class="big reveal d2">Validated in<br><span class="accent-teal">simulation</span></h2>
+  <p class="sub reveal d3" style="opacity:.45">MATLAB &amp; Simulink &nbsp;·&nbsp; Electro-Hydrostatic Actuators (EHA)</p>
+  <div class="grid2">
+    <div class="card rl d3">
+      <div class="step-num accent-blue">01</div>
+      <h3>Build EHA model</h3>
+      <p>Developed a dynamic simulation in MATLAB & Simulink capturing all mechanical, hydraulic, and fluid interactions in the actuator system</p>
+    </div>
+    <div class="card rr d4">
+      <div class="step-num accent-teal">02</div>
+      <h3>Two configurations</h3>
+      <p>Tested standard EHA vs ESR-integrated EHA side by side under identical operating conditions for a clean direct comparison</p>
+    </div>
+    <div class="card rl d5">
+      <div class="step-num accent-amber">03</div>
+      <h3>Measure all energy flows</h3>
+      <p>Input energy, recoverable load energy and all system losses tracked and logged across the complete operating cycle</p>
+    </div>
+    <div class="card rr d6">
+      <div class="step-num accent-green">04</div>
+      <h3>Compute &amp; compare CPI</h3>
+      <p>CPI formula applied to both configurations — producing a clear numerical measure of the performance benefit delivered by ESR integration</p>
+    </div>
+  </div>
+</section>
+
+<section class="scene s4" id="s4">
+  <p class="kicker reveal d1">Key results</p>
+  <h2 class="big reveal d2"><span class="accent-green">40%</span> improvement<br>in energy performance</h2>
+  <p class="sub reveal d3" style="opacity:.6">CPI rose from 0.15 to 0.21 when ESR circuits were integrated</p>
+  <div class="bar-zone reveal d4">
+    <div class="bw">
+      <div class="bnum" style="color:#85B7EB">0.15</div>
+      <div class="bar" id="b1" style="background:linear-gradient(180deg,#378ADD,#0C447C);height:0"></div>
+      <div class="bfoot" style="background:#0C447C"></div>
+      <div class="blbl">Without ESR</div>
+      <div class="bsub">Standard EHA</div>
+    </div>
+    <div class="vs">
+      <div class="va">&#8593;</div>
+      <div class="vn">+40%</div>
+      <div class="vp">improvement</div>
+    </div>
+    <div class="bw">
+      <div class="bnum" style="color:#C0DD97">0.21</div>
+      <div class="bar" id="b2" style="background:linear-gradient(180deg,#97C459,#27500A);height:0"></div>
+      <div class="bfoot" style="background:#27500A"></div>
+      <div class="blbl">With ESR</div>
+      <div class="bsub">Energy-recovering EHA</div>
+    </div>
+  </div>
+</section>
+
+<section class="scene s5" id="s5">
+  <p class="kicker reveal d1">Why it matters</p>
+  <h2 class="big reveal d2">Better metrics.<br><span class="accent-teal">Better designs.</span></h2>
+  <div class="itiles">
+    <div class="itile rl d3"><div class="ii">&#9889;</div><h4>Standardised benchmarking</h4><p>One reproducible number to fairly compare any hydraulic system configuration</p></div>
+    <div class="itile reveal d4"><div class="ii">&#9850;</div><h4>Sustainable design</h4><p>Supports greener, more efficient machinery in aerospace, industrial &amp; HVAC</p></div>
+    <div class="itile rr d3"><div class="ii">&#9881;</div><h4>ESR optimisation</h4><p>Pinpoints exactly where recovered energy is lost before reuse</p></div>
+  </div>
+  <p class="reveal d5" style="margin-top:28px;font-size:13px;opacity:.35">Jaykumar Patel &nbsp;·&nbsp; MSc Mechanical Engineering &nbsp;·&nbsp; University of Manitoba</p>
+</section>
+
+<section class="scene s6" id="s6">
+  <p class="kicker reveal d1">Let's connect</p>
+  <h2 class="mid reveal d2">Interested in<br><span class="accent-blue">fluid power</span> or<br><span class="accent-teal">energy-efficient systems?</span></h2>
+  <div class="reveal d3 connect-box">
+    <h3>Jaykumar Patel</h3>
+    <p>MSc Mechanical Engineering &nbsp;·&nbsp; University of Manitoba<br>Specialising in HVAC, fluid dynamics &amp; mechanical design</p>
+    <a href="https://www.linkedin.com/in/Jaykumar-patelJP" target="_blank">Connect on LinkedIn &rarr;</a>
+  </div>
+  <p class="reveal d4" style="margin-top:24px;font-size:12px;opacity:.2;letter-spacing:.06em">github.com/Jaykumar-patelJP</p>
+</section>
+
+<script>
+const canvas=document.getElementById('pts'),ctx=canvas.getContext('2d');
+let W,H,pts=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+function Pt(){this.x=Math.random()*1920;this.y=Math.random()*1080;this.r=Math.random()*1.6+.3;this.vx=(Math.random()-.5)*.28;this.vy=(Math.random()-.5)*.28;this.a=Math.random()*.45+.08;}
+Pt.prototype.tick=function(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W)this.vx*=-1;if(this.y<0||this.y>H)this.vy*=-1;};
+for(let i=0;i<120;i++)pts.push(new Pt());
+function draw(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.tick();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(56,138,221,${p.a})`;ctx.fill();});requestAnimationFrame(draw);}
+draw();
+
+const scenes=document.querySelectorAll('.scene');
+const pnav=document.getElementById('pnav');
+scenes.forEach((_,i)=>{const b=document.createElement('button');b.className='pndot';b.onclick=()=>scenes[i].scrollIntoView({behavior:'smooth'});pnav.appendChild(b);});
+
+function updateNav(){const mid=window.innerHeight/2;scenes.forEach((s,i)=>{const r=s.getBoundingClientRect();pnav.children[i].classList.toggle('on',r.top<=mid&&r.bottom>mid);});}
+
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.reveal,.rl,.rr,.rs').forEach(el=>el.classList.add('on'));
+      if(e.target.id==='s4')setTimeout(()=>{document.getElementById('b1').style.height='100px';document.getElementById('b2').style.height='164px';},400);
+    }
+  });
+},{threshold:.2});
+scenes.forEach(s=>obs.observe(s));
+window.addEventListener('scroll',updateNav,{passive:true});
+updateNav();
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='PageDown')window.scrollBy({top:window.innerHeight,behavior:'smooth'});
+  if(e.key==='ArrowUp'||e.key==='PageUp')window.scrollBy({top:-window.innerHeight,behavior:'smooth'});
+});
+</script>
+</body>
+</html>
